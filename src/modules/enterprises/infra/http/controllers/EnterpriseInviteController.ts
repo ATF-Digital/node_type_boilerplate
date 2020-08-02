@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import CreateEnterpriseInviteService from '@modules/enterprises/services/CreateEnterpriseInviteService';
 
 import { container } from 'tsyringe';
+import { classToClass, plainToClass } from 'class-transformer';
+import Enterprises from '../../typeorm/entities/Enterprises';
 
 export default class EnterpriseInviteController {
   public async index(request: Request, response: Response): Promise<Response> {
@@ -34,7 +36,7 @@ export default class EnterpriseInviteController {
       user_id,
     );
 
-    return response.json(enterpriseInvite);
+    return response.json(classToClass(enterpriseInvite));
   }
 
   public async update(request: Request, response: Response): Promise<Response> {

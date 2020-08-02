@@ -4,19 +4,21 @@ import CreateServicesService from '@modules/services/services/CreateServicesServ
 import SearchServiceService from '@modules/services/services/SearchServiceService';
 
 import { container } from 'tsyringe';
+import { classToClass } from 'class-transformer';
 
 export default class ServiceController {
   public async index(request: Request, response: Response): Promise<Response> {
-    const { enterprise_id, day_week } = request.params;
+    const { enterprise_id, day_week, category_id } = request.params;
 
     const searchServiceService = container.resolve(SearchServiceService);
 
     const serviceCategory = await searchServiceService.execute({
       enterprise_id,
       day_week,
+      category_id,
     });
 
-    return response.json(serviceCategory);
+    return response.json(classToClass(serviceCategory));
   }
 
   public async create(request: Request, response: Response): Promise<Response> {

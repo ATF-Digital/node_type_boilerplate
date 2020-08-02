@@ -4,6 +4,7 @@ import CreateEnterpriseService from '@modules/enterprises/services/CreateEnterpr
 import GetEnterpriseByNameService from '@modules/enterprises/services/GetEnterpriseByNameService';
 
 import { container } from 'tsyringe';
+import { classToClass } from 'class-transformer';
 
 export default class EnterpriseController {
   public async show(request: Request, response: Response): Promise<Response> {
@@ -15,7 +16,7 @@ export default class EnterpriseController {
       name,
     });
 
-    return response.json(enterprise);
+    return response.json(classToClass(enterprise));
   }
 
   public async create(request: Request, response: Response): Promise<Response> {

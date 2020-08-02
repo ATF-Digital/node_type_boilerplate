@@ -44,6 +44,7 @@ class EnterprisesUsersRepository implements IEnterprisesUsersRepository {
   ): Promise<EnterprisesUsers | undefined> {
     const enterprise = await this.ormRepository.findOne({
       where: { user_id },
+      relations: ['enterprise', 'user'],
     });
 
     return enterprise;
@@ -51,6 +52,7 @@ class EnterprisesUsersRepository implements IEnterprisesUsersRepository {
 
   public async findAllByUserId(user_id: string): Promise<EnterprisesUsers[]> {
     const enterprise = await this.ormRepository.find({
+      relations: ['enterprise', 'user'],
       where: { user_id },
     });
 

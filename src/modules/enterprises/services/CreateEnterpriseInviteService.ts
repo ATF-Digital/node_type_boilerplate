@@ -41,7 +41,7 @@ class CreateEnterpriseService {
 
     if (!invite) {
       throw new AppError(
-        'Invite with this user and this enterprise not exists.',
+        'Não existe nenhum convite deste usuário com esta empresa.',
       );
     }
 
@@ -66,7 +66,7 @@ class CreateEnterpriseService {
 
     if (!invite) {
       throw new AppError(
-        'Invite with this user and this enterprise not exists.',
+        'Não existe nenhum convite deste usuário com esta empresa.',
       );
     }
 
@@ -75,7 +75,7 @@ class CreateEnterpriseService {
     );
 
     if (user_id !== invite?.user_id && user_id !== enterprise?.owner_id) {
-      throw new AppError('You are not a member of this invite.');
+      throw new AppError('Usuário não faz parte do convite.');
     }
 
     invite.accepted = 1;
@@ -98,18 +98,18 @@ class CreateEnterpriseService {
 
     if (invite) {
       throw new AppError(
-        'An invite with this user and this enterprise already exists.',
+        'Já existe um convite deste usuário com esta empresa.',
       );
     }
     const user = await this.usersRepository.findById(user_id);
 
     if (!user) {
-      throw new AppError('This user not exists.');
+      throw new AppError('Usuário não existe.');
     }
     const enterprise = await this.enterprisesRepository.findById(enterprise_id);
 
     if (!enterprise) {
-      throw new AppError('This enterprise not exists.');
+      throw new AppError('Empresa não existe.');
     }
 
     const enterpriseInvite = await this.enterprisesUsersRepository.create({

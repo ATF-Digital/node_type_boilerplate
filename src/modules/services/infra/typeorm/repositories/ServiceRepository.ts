@@ -4,9 +4,10 @@ import IServiceRepository from '@modules/services/repositories/IServiceRepositor
 import IServiceDTO from '@modules/services/dtos/IServiceDTO';
 import Service from '../entities/Service';
 
-interface SearchData {
+interface ISearchData {
   enterprise_id: string;
   day_week: string;
+  category_id: string;
 }
 
 class ServiceRepository implements IServiceRepository {
@@ -23,12 +24,14 @@ class ServiceRepository implements IServiceRepository {
   }
 
   public async findByDayWeekAndEnterpriseId(
-    searchData: SearchData,
+    searchData: ISearchData,
   ): Promise<Service[]> {
     const services = await this.ormRepository.find({
+      relations: ['description', 'appointments', 'appointments.user'],
       where: {
         enterprise_id: searchData.enterprise_id,
         day_week: searchData.day_week,
+        category_id: searchData.category_id,
       },
     });
 
