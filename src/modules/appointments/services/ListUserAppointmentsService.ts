@@ -6,6 +6,11 @@ import { classToClass } from 'class-transformer';
 import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
 import Appointments from '../infra/typeorm/entities/Appointment';
 
+interface IAppointmentResponse {
+  futureAppointments: Appointments[];
+  pastAppointments: Appointments[];
+}
+
 @injectable()
 class ListProviderService {
   constructor(
@@ -19,12 +24,15 @@ class ListProviderService {
     private cacheProvider: ICacheProvider,
   ) {}
 
-  public async execute(user_id: string): Promise<Appointments[]> {
+  public async execute(user_id: string): Promise<IAppointmentResponse> {
     // let users = await this.cacheProvider.recover<Appointments[]>(
     //   `providers-list:${user_id}`,
     // );
     // if (!users) {
-    const appointments = await this.appointmentsRepository.findAllFromUser(
+    const futureAppointments = await this.appointmentsRepository.findAllFromUserInFutureDate(
+      user_id,
+    );
+    const pastAppointments = await this.appointmentsRepository.findAllFromUserInPastDate(
       user_id,
     );
 
@@ -34,7 +42,7 @@ class ListProviderService {
     // );
     // }
 
-    return appointments;
+    return { futureAppointments, pastAppointments };
   }
 }
 export default ListProviderService;

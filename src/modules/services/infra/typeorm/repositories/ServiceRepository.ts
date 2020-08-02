@@ -6,8 +6,9 @@ import Service from '../entities/Service';
 
 interface ISearchData {
   enterprise_id: string;
-  day_week: string;
+  day_week: number;
   category_id: string;
+  start_hour?: string;
 }
 
 class ServiceRepository implements IServiceRepository {
@@ -38,32 +39,47 @@ class ServiceRepository implements IServiceRepository {
     return services;
   }
 
-  // const serviceDescription = this.ormRepository.create(
-  //   serviceDescriptionData.map(data => {
-  //     const service = this.ormRepository.findByDayWeekAndEnterpriseIdAndNameAndCategory(
-  //       {
-  //         enterprise_id: data.enterprise_id,
-  //         day_week: data.day_week,
-  //         category_id: data.category_id,
-  //         start_hour: data.start_hour,
-  //       },
-  //     );
-  //     if (!service) {
-  //       return { ...data };
-  //     }
-  //   }),
-  // );
+  public async findByDayWeekAndEnterpriseIdAndNameAndCategory(
+    searchData: ISearchData,
+  ): Promise<Service | undefined> {
+    const services = await this.ormRepository.findOne({
+      where: {
+        enterprise_id: searchData.enterprise_id,
+        day_week: searchData.day_week,
+        category_id: searchData.category_id,
+        start_hour: searchData.start_hour,
+      },
+    });
+
+    return services;
+  }
 
   public async create(
     serviceDescriptionData: IServiceDTO[],
   ): Promise<Service[]> {
-    const serviceDescription = this.ormRepository.create(
-      serviceDescriptionData.map(data => ({ ...data })),
-    );
+    const checkExistService: Service[] = [];
 
-    await this.ormRepository.save(serviceDescription);
+    const serviceDescription = serviceDescriptionData.map(async data => {
+      const service = await this.findByDayWeekAndEnterpriseIdAndNameAndCategory(
+        {
+          enterprise_id: data.enterprise_id,
+          day_week: data.day_week,
+          category_id: data.category_id,
+          start_hour: data.start_hour,
+        },
+      );
+      if (!service) {
+        return checkExistService.push(data);
+      }
+    });
 
-    return serviceDescription;
+    await Promise.all(serviceDescription);
+
+    const myService = this.ormRepository.create(checkExistService);
+
+    await this.ormRepository.save(myService);
+
+    return myService;
   }
 
   public async save(serviceDescriptionData: Service[]): Promise<Service[]> {

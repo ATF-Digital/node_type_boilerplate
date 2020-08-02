@@ -4,6 +4,7 @@ import {
   Raw,
   Between,
   MoreThanOrEqual,
+  LessThan,
 } from 'typeorm';
 
 import IAppointmentsRepository from '@modules/appointments/repositories/IAppointmentsRepository';
@@ -72,6 +73,52 @@ class AppointmentsRepository implements IAppointmentsRepository {
         user_id,
       },
       relations: ['user', 'service'],
+    });
+
+    return appointments;
+  }
+
+  public async findAllFromUserInFutureDate(
+    user_id: string,
+  ): Promise<Appointment[]> {
+    const appointments = this.ormRepository.find({
+      where: {
+        user_id,
+        date: MoreThanOrEqual(new Date()),
+      },
+      relations: [
+        'user',
+        'service',
+        'enterprise',
+        'service.appointments',
+        'service.appointments.user',
+      ],
+      order: {
+        date: 'ASC',
+      },
+    });
+
+    return appointments;
+  }
+
+  public async findAllFromUserInPastDate(
+    user_id: string,
+  ): Promise<Appointment[]> {
+    const appointments = this.ormRepository.find({
+      where: {
+        user_id,
+        date: LessThan(new Date()),
+      },
+      relations: [
+        'user',
+        'service',
+        'enterprise',
+        'service.appointments',
+        'service.appointments.user',
+      ],
+      order: {
+        date: 'ASC',
+      },
     });
 
     return appointments;

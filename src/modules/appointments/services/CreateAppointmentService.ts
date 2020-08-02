@@ -67,23 +67,23 @@ class CreateAppointmentService {
     const user = await this.usersRepository.findById(user_id);
 
     if (!user) {
-      throw new AppError('this user doesnt exists');
+      throw new AppError('Dados do usuário não existe.');
     }
 
     const service = await this.serviceRepository.findById(service_id);
 
     if (!service) {
-      throw new AppError('this service doesnt exists');
+      throw new AppError('Dados do serviço não existe.');
     }
 
     const enterprise = await this.enterprisesRepository.findById(enterprise_id);
 
     if (!enterprise) {
-      throw new AppError('this enterprise doesnt exists');
+      throw new AppError('Dados da empresa não existe');
     }
 
     if (enterprise_id !== service.enterprise_id) {
-      throw new AppError('this service isnt from this enterprise');
+      throw new AppError('Este serviço não pertence à esta empresa.');
     }
 
     const formattedDateWithSubHoursToSchedule = addHours(
@@ -102,17 +102,19 @@ class CreateAppointmentService {
 
     if (!Number(hour) && !Number(minute)) {
       throw new AppError(
-        "Wrong format of hour and minute, fix the title to same as example '09:00'",
+        "Horas e minutos com formato errado, coloque o titulo do serviço como o exemplo: '09:00'",
       );
     }
 
     if (isBefore(formattedServiceDate, new Date())) {
-      throw new AppError("You can't create an appointment on a past date");
+      throw new AppError(
+        'Não é possível se agendar em uma data que já passou.',
+      );
     }
 
     if (isBefore(formattedServiceDate, formattedDateWithSubHoursToSchedule)) {
       throw new AppError(
-        `You can't do checkin if has left ${service.hour_to_schedule} to service`,
+        `Você não pode se agendar faltando ${service.hour_to_schedule}h para o horário`,
       );
     }
 
@@ -122,17 +124,15 @@ class CreateAppointmentService {
     );
 
     if (!currentPlan) {
-      throw new AppError(
-        'User doesnt have an active plan for this enterprise.',
-      );
+      throw new AppError('Usuário sem plano com a empresa.');
     }
 
     if (isBefore(currentPlan.expiration_at, new Date())) {
-      throw new AppError('User plan expired.');
+      throw new AppError('Plano do usuário expirado.');
     }
 
     if (!currentPlan.active) {
-      throw new AppError('User plan not active.');
+      throw new AppError('Seu plano com esta empresa não esta ativo.');
     }
 
     if (enterprise?.owner_id === user_id) {
@@ -152,7 +152,7 @@ class CreateAppointmentService {
     );
 
     if (isUserInThisServiceAppointment) {
-      throw new AppError('You are already on the service.');
+      throw new AppError('Usuário já agendado neste horário.');
     }
 
     const userAppointments = await this.appointmentsRepository.findAllFromUserInThisEnterprise(
@@ -166,7 +166,7 @@ class CreateAppointmentService {
 
     if (futureAppointments.length > 0 && !service.pending_scheduling) {
       throw new AppError(
-        'You already have a pending appointment with this enterprise.',
+        'Você já tem um agendamento pendente com esta empresa.',
       );
     }
 
@@ -175,7 +175,7 @@ class CreateAppointmentService {
     );
 
     if (Number(usersInService) >= Number(service.capacity)) {
-      throw new AppError('This appointment is full.');
+      throw new AppError('Este horário esta cheio.');
     }
 
     const planAppointmentsCapacity = await this.plansRepository.findById(
@@ -195,11 +195,11 @@ class CreateAppointmentService {
       Number(planAppointmentsCapacity?.schedule_limit)
     ) {
       throw new AppError(
-        `you can schedule ${Number(
+        `Você pode se agendar ${Number(
           planAppointmentsCapacity?.schedule_limit,
-        )} times and ${Number(
+        )} vezes com o seu plano atual, mas já agendou ${Number(
           allUsersAppointmentsFromThisEnterprise.length,
-        )} has already been scheduled`,
+        )} vezes`,
       );
     }
 

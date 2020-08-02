@@ -3,9 +3,9 @@ import IServiceDTO from '../dtos/IServiceDTO';
 
 interface ISearchData {
   enterprise_id: string;
-  day_week: string;
+  day_week: number;
   category_id: string;
-  start_hour: string;
+  start_hour?: string;
 }
 
 export default interface IServiceRepository {

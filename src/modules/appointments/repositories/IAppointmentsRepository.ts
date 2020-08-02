@@ -13,6 +13,8 @@ export default interface IAppointmentsRepository {
     data: IFindAllUserAppoinrmentFromEnterpriseDTO,
   ): Promise<Appointment[]>;
   findAllFromUser(user_id: string): Promise<Appointment[]>;
+  findAllFromUserInPastDate(user_id: string): Promise<Appointment[]>;
+  findAllFromUserInFutureDate(user_id: string): Promise<Appointment[]>;
   findAllFromUserInThisEnterprise(
     user_id: string,
     enterprise_id: string,
