@@ -38,6 +38,22 @@ class ServiceRepository implements IServiceRepository {
     return services;
   }
 
+  // const serviceDescription = this.ormRepository.create(
+  //   serviceDescriptionData.map(data => {
+  //     const service = this.ormRepository.findByDayWeekAndEnterpriseIdAndNameAndCategory(
+  //       {
+  //         enterprise_id: data.enterprise_id,
+  //         day_week: data.day_week,
+  //         category_id: data.category_id,
+  //         start_hour: data.start_hour,
+  //       },
+  //     );
+  //     if (!service) {
+  //       return { ...data };
+  //     }
+  //   }),
+  // );
+
   public async create(
     serviceDescriptionData: IServiceDTO[],
   ): Promise<Service[]> {
