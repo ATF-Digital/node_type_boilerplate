@@ -29,7 +29,12 @@ export default class Services {
   @Column('varchar', { name: 'start_hour', length: 255 })
   start_hour: string;
 
-  @Column('varchar', { name: 'description_id', length: 255 })
+  @Column('varchar', {
+    name: 'description_id',
+    length: 255,
+    nullable: true,
+    default: null,
+  })
   description_id: string;
 
   @Column('varchar', { name: 'category_id', length: 255 })

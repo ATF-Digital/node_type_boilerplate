@@ -5,6 +5,8 @@ import GetEnterpriseByNameService from '@modules/enterprises/services/GetEnterpr
 
 import { container } from 'tsyringe';
 import { classToClass } from 'class-transformer';
+import GetMyEnterprise from '@modules/enterprises/services/GetMyEnterprise';
+import GetAllEnterprises from '@modules/enterprises/services/GetAllEnterprises';
 
 export default class EnterpriseController {
   public async show(request: Request, response: Response): Promise<Response> {
@@ -14,6 +16,30 @@ export default class EnterpriseController {
 
     const enterprise = await createEnterprise.execute({
       name,
+    });
+
+    return response.json(classToClass(enterprise));
+  }
+
+  public async mine(request: Request, response: Response): Promise<Response> {
+    const user_id = request.user.id;
+
+    const createEnterprise = container.resolve(GetMyEnterprise);
+
+    const enterprise = await createEnterprise.execute({
+      user_id,
+    });
+
+    return response.json(classToClass(enterprise));
+  }
+
+  public async all(request: Request, response: Response): Promise<Response> {
+    const user_id = request.user.id;
+
+    const createEnterprise = container.resolve(GetAllEnterprises);
+
+    const enterprise = await createEnterprise.execute({
+      user_id,
     });
 
     return response.json(classToClass(enterprise));

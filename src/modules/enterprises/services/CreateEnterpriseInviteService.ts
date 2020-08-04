@@ -1,6 +1,8 @@
 import { inject, injectable } from 'tsyringe';
 import AppError from '@shared/errors/AppError';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import { isBefore } from 'date-fns';
+import IPlansUserRepository from '@modules/plans/repositories/IPlansUserRepository';
 import EnterprisesUsers from '../infra/typeorm/entities/EnterprisesUsers';
 import IEnterprisesUsersRepository from '../repositories/IEnterprisesUsersRepository';
 import IEnterprisesRepository from '../repositories/IEnterprisesRepository';
@@ -23,6 +25,9 @@ class CreateEnterpriseService {
 
     @inject('UsersRepository')
     private usersRepository: IUsersRepository,
+
+    @inject('PlansUserRepository')
+    private plansUserRepository: IPlansUserRepository,
 
     @inject('EnterprisesRepository')
     private enterprisesRepository: IEnterprisesRepository,
@@ -48,10 +53,58 @@ class CreateEnterpriseService {
     return invite;
   }
 
+  public async canEnter({
+    enterprise_id,
+    user_id,
+  }: IRequest): Promise<EnterprisesUsers> {
+    const invite = await this.enterprisesUsersRepository.findByUserIdAndEnterpriseId(
+      { user_id, enterprise_id },
+    );
+
+    if (!invite) {
+      throw new AppError(
+        'Não existe nenhum convite deste usuário com esta empresa.',
+      );
+    }
+
+    if (!invite.accepted && invite.enterprise.isPrivate) {
+      throw new AppError('Esta empresa é privada e ela ainda não te aceitou.');
+    }
+
+    const currentPlan = await this.plansUserRepository.findByActive(
+      user_id,
+      enterprise_id,
+    );
+
+    if (!currentPlan) {
+      throw new AppError('Usuário sem plano com a empresa.');
+    }
+
+    if (isBefore(currentPlan.expiration_at, new Date())) {
+      throw new AppError('Plano do usuário expirado.');
+    }
+
+    if (!currentPlan.active) {
+      throw new AppError('Seu plano com esta empresa não esta ativo.');
+    }
+
+    return invite;
+  }
+
   public async searchAllUserInvites(
     user_id: string,
   ): Promise<EnterprisesUsers[]> {
     const invites = await this.enterprisesUsersRepository.findAllByUserId(
+      user_id,
+    );
+
+    return invites;
+  }
+
+  public async searchAllUserAcceptedInvites(
+    user_id: string,
+  ): Promise<EnterprisesUsers[]> {
+    const invites = await this.enterprisesUsersRepository.findAllByUserIdAndAccepted(
       user_id,
     );
 
@@ -97,9 +150,10 @@ class CreateEnterpriseService {
     );
 
     if (invite) {
-      throw new AppError(
-        'Já existe um convite deste usuário com esta empresa.',
-      );
+      if (!invite?.accepted) {
+        throw new AppError('A empresa ainda não aceitou sua solicitação.');
+      }
+      throw new AppError('Já existe um convite com esta empresa.');
     }
     const user = await this.usersRepository.findById(user_id);
 
@@ -110,6 +164,20 @@ class CreateEnterpriseService {
 
     if (!enterprise) {
       throw new AppError('Empresa não existe.');
+    }
+
+    if (enterprise.owner_id === user_id) {
+      throw new AppError('Você não pode convidar sua própria empresa.');
+    }
+
+    if (!enterprise.isPrivate) {
+      const enterpriseInvite = await this.enterprisesUsersRepository.create({
+        enterprise_id,
+        user_id,
+        accepted: 1,
+      });
+
+      return enterpriseInvite;
     }
 
     const enterpriseInvite = await this.enterprisesUsersRepository.create({

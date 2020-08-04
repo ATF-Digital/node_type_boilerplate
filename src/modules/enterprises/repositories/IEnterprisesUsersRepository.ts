@@ -9,6 +9,7 @@ export default interface IEnterprisesUsersRepository {
   ): Promise<EnterprisesUsers | undefined>;
   findByUserId(user_id: string): Promise<EnterprisesUsers | undefined>;
   findAllByUserId(user_id: string): Promise<EnterprisesUsers[]>;
+  findAllByUserIdAndAccepted(user_id: string): Promise<EnterprisesUsers[]>;
   findByUserIdAndEnterpriseId(
     data: ICreateEnterpriseInviteDTO,
   ): Promise<EnterprisesUsers | undefined>;

@@ -29,6 +29,7 @@ interface IRequest {
   service_id: string;
   user_id: string;
   enterprise_id: string;
+  service_date: Date;
 }
 
 @injectable()
@@ -63,6 +64,7 @@ class CreateAppointmentService {
     service_id,
     user_id,
     enterprise_id,
+    service_date,
   }: IRequest): Promise<Appointment> {
     const user = await this.usersRepository.findById(user_id);
 
@@ -93,9 +95,9 @@ class CreateAppointmentService {
 
     const [hour, minute] = service.start_hour.split(':');
     const formattedServiceDate = new Date(
-      getYear(new Date()),
-      getMonth(new Date()),
-      getDate(new Date()),
+      getYear(new Date(service_date)),
+      getMonth(new Date(service_date)),
+      getDate(new Date(service_date)),
       Number(hour) || 0,
       Number(minute) || 0,
     );
@@ -106,7 +108,7 @@ class CreateAppointmentService {
       );
     }
 
-    if (isBefore(formattedServiceDate, new Date())) {
+    if (isBefore(new Date(formattedServiceDate), new Date())) {
       throw new AppError(
         'Não é possível se agendar em uma data que já passou.',
       );

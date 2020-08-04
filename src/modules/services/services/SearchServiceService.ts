@@ -2,14 +2,17 @@ import AppError from '@shared/errors/AppError';
 
 import { inject, injectable } from 'tsyringe';
 import IEnterprisesRepository from '@modules/enterprises/repositories/IEnterprisesRepository';
-import { getMinutes, getHours } from 'date-fns';
+import { getMinutes, getHours, isBefore } from 'date-fns';
 import Service from '../infra/typeorm/entities/Service';
 import IServiceRepository from '../repositories/IServiceRepository';
 
 interface IRequest {
   enterprise_id: string;
-  day_week: string;
+  day_week: number;
   category_id: string;
+  year: number;
+  month: number;
+  day: number;
 }
 
 @injectable()
@@ -26,6 +29,9 @@ class SearchServiceService {
     enterprise_id,
     day_week,
     category_id,
+    year,
+    month,
+    day,
   }: IRequest): Promise<Service[]> {
     const enterprise = await this.enterprisesRepository.findById(enterprise_id);
 
@@ -42,13 +48,11 @@ class SearchServiceService {
     );
 
     serviceDescription.map(service => {
+      const [hour, minute] = service.start_hour.split(':');
       return Object.assign(service, {
         disabled:
-          Number(service.start_hour.replace(':', '')) <
-            Number(
-              getHours(new Date()).toString() +
-                getMinutes(new Date()).toString(),
-            ) || service.capacity <= service.appointments.length,
+          isBefore(new Date(year, month, day, hour, minute), new Date()) ||
+          service.capacity <= service.appointments.length,
       });
     });
 

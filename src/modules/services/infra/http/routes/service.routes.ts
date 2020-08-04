@@ -15,7 +15,7 @@ const serviceController = new ServiceController();
 servicesRouter.use(ensureAuthenticated);
 
 servicesRouter.get(
-  '/enterprise/:enterprise_id/day/:day_week/category/:category_id',
+  '/enterprise/:enterprise_id/day/:day_week/category/:category_id/:year/:month/:day',
   serviceController.index,
 );
 

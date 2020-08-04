@@ -42,6 +42,10 @@ enterprisesRouter.get(
   enterprisesController.show,
 );
 
+enterprisesRouter.get('/mine', enterprisesController.mine);
+
+enterprisesRouter.get('/all', enterprisesController.all);
+
 enterprisesRouter.patch(
   '/logo',
   ensureAuthenticated,

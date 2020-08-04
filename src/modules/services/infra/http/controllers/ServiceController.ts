@@ -8,7 +8,14 @@ import { classToClass } from 'class-transformer';
 
 export default class ServiceController {
   public async index(request: Request, response: Response): Promise<Response> {
-    const { enterprise_id, day_week, category_id } = request.params;
+    const {
+      enterprise_id,
+      day_week,
+      category_id,
+      year,
+      month,
+      day,
+    } = request.params;
 
     const searchServiceService = container.resolve(SearchServiceService);
 
@@ -16,6 +23,9 @@ export default class ServiceController {
       enterprise_id,
       day_week,
       category_id,
+      year,
+      month,
+      day,
     });
 
     return response.json(classToClass(serviceCategory));

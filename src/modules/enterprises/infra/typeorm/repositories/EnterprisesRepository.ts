@@ -1,4 +1,4 @@
-import { Repository, getRepository, Not, Like } from 'typeorm';
+import { Repository, getRepository, Like, Not } from 'typeorm';
 
 import IEnterprisesRepository from '@modules/enterprises/repositories/IEnterprisesRepository';
 import ICreateEnterpriseDTO from '@modules/enterprises/dtos/ICreateEnterpriseDTO';
@@ -33,6 +33,12 @@ class EnterprisesRepository implements IEnterprisesRepository {
     const enterprise = await this.ormRepository.find({
       name: Like(`%${name}%`),
     });
+
+    return enterprise;
+  }
+
+  public async findAll(user_id: string): Promise<Enterprises[]> {
+    const enterprise = await this.ormRepository.find();
 
     return enterprise;
   }

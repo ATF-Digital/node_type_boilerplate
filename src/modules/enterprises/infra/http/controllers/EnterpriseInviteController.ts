@@ -22,6 +22,22 @@ export default class EnterpriseInviteController {
     return response.json(enterpriseInvite);
   }
 
+  public async show(request: Request, response: Response): Promise<Response> {
+    const { enterprise_id } = request.params;
+    const user_id = request.user.id;
+
+    const createEnterpriseInvite = container.resolve(
+      CreateEnterpriseInviteService,
+    );
+
+    const enterpriseInvite = await createEnterpriseInvite.canEnter({
+      enterprise_id,
+      user_id,
+    });
+
+    return response.json(enterpriseInvite);
+  }
+
   public async allInvites(
     request: Request,
     response: Response,
@@ -33,6 +49,23 @@ export default class EnterpriseInviteController {
     );
 
     const enterpriseInvite = await createEnterpriseInvite.searchAllUserInvites(
+      user_id,
+    );
+
+    return response.json(classToClass(enterpriseInvite));
+  }
+
+  public async allAcceptedInvites(
+    request: Request,
+    response: Response,
+  ): Promise<Response> {
+    const user_id = request.user.id;
+
+    const createEnterpriseInvite = container.resolve(
+      CreateEnterpriseInviteService,
+    );
+
+    const enterpriseInvite = await createEnterpriseInvite.searchAllUserAcceptedInvites(
       user_id,
     );
 

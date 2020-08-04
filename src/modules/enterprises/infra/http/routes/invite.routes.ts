@@ -32,6 +32,14 @@ enterprisesInviteRouter.get(
   enterpriseInviteController.index,
 );
 enterprisesInviteRouter.get('/', enterpriseInviteController.allInvites);
+enterprisesInviteRouter.get(
+  '/accepted',
+  enterpriseInviteController.allAcceptedInvites,
+);
+enterprisesInviteRouter.get(
+  '/active-plan/:enterprise_id',
+  enterpriseInviteController.show,
+);
 enterprisesInviteRouter.put(
   '/accept',
   celebrate({

@@ -59,6 +59,17 @@ class EnterprisesUsersRepository implements IEnterprisesUsersRepository {
     return enterprise;
   }
 
+  public async findAllByUserIdAndAccepted(
+    user_id: string,
+  ): Promise<EnterprisesUsers[]> {
+    const enterprise = await this.ormRepository.find({
+      relations: ['enterprise', 'user'],
+      where: { user_id, accepted: 1 },
+    });
+
+    return enterprise;
+  }
+
   public async create(
     enterpriseData: ICreateEnterpriseInviteDTO,
   ): Promise<EnterprisesUsers> {
