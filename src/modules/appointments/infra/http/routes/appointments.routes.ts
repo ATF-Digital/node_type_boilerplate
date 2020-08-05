@@ -12,6 +12,16 @@ appointmentsRouter.use(ensureAuthenticated);
 
 appointmentsRouter.get('/me', appointmentsController.index);
 
+appointmentsRouter.delete(
+  '/:appointment_id',
+  celebrate({
+    [Segments.PARAMS]: {
+      appointment_id: Joi.string().uuid().required(),
+    },
+  }),
+  appointmentsController.remove,
+);
+
 appointmentsRouter.post(
   '/',
   celebrate({

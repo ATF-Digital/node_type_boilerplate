@@ -61,6 +61,14 @@ class CreateEnterpriseService {
       { user_id, enterprise_id },
     );
 
+    const myEnterprise = await this.enterprisesRepository.findByOwnerId(
+      user_id,
+    );
+
+    if (myEnterprise) {
+      return myEnterprise;
+    }
+
     if (!invite) {
       throw new AppError(
         'Não existe nenhum convite deste usuário com esta empresa.',
@@ -76,16 +84,18 @@ class CreateEnterpriseService {
       enterprise_id,
     );
 
-    if (!currentPlan) {
+    if (!currentPlan && invite.enterprise.isPrivate) {
       throw new AppError('Usuário sem plano com a empresa.');
     }
 
-    if (isBefore(currentPlan.expiration_at, new Date())) {
-      throw new AppError('Plano do usuário expirado.');
-    }
+    if (currentPlan) {
+      if (isBefore(currentPlan.expiration_at, new Date())) {
+        throw new AppError('Plano do usuário expirado.');
+      }
 
-    if (!currentPlan.active) {
-      throw new AppError('Seu plano com esta empresa não esta ativo.');
+      if (!currentPlan.active) {
+        throw new AppError('Seu plano com esta empresa não esta ativo.');
+      }
     }
 
     return invite;

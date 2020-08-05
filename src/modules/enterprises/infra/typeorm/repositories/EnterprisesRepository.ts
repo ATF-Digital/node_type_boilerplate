@@ -38,7 +38,17 @@ class EnterprisesRepository implements IEnterprisesRepository {
   }
 
   public async findAll(user_id: string): Promise<Enterprises[]> {
-    const enterprise = await this.ormRepository.find();
+    const enterprise = await this.ormRepository.find({
+      relations: ['usersEnterprises'],
+    });
+
+    return enterprise;
+  }
+
+  public async findAllNotAssociated(user_id: string): Promise<Enterprises[]> {
+    const enterprise = await this.ormRepository.query(
+      `SELECT * from ( Select enterprises.*,  users_enterprises.user_id, COALESCE( users_enterprises.accepted, -1) as aceito from enterprises left join users_enterprises on (enterprises.id = users_enterprises.enterprise_id and users_enterprises.user_id = '${user_id}' ) where enterprises.owner_id != '${user_id}' ) as empresa where aceito != 1`,
+    );
 
     return enterprise;
   }

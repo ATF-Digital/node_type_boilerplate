@@ -108,6 +108,17 @@ class CreateAppointmentService {
       );
     }
 
+    if (enterprise?.owner_id === user_id) {
+      const ownerAppointment = await this.appointmentsRepository.create({
+        service_id,
+        user_id,
+        date: formattedServiceDate,
+        enterprise_id,
+      });
+
+      return ownerAppointment;
+    }
+
     if (isBefore(new Date(formattedServiceDate), new Date())) {
       throw new AppError(
         'Não é possível se agendar em uma data que já passou.',
@@ -125,27 +136,43 @@ class CreateAppointmentService {
       enterprise_id,
     );
 
-    if (!currentPlan) {
+    if (!currentPlan && enterprise.isPrivate) {
       throw new AppError('Usuário sem plano com a empresa.');
     }
 
-    if (isBefore(currentPlan.expiration_at, new Date())) {
-      throw new AppError('Plano do usuário expirado.');
-    }
+    if (currentPlan) {
+      if (isBefore(currentPlan.expiration_at, new Date())) {
+        throw new AppError('Plano do usuário expirado.');
+      }
 
-    if (!currentPlan.active) {
-      throw new AppError('Seu plano com esta empresa não esta ativo.');
-    }
+      if (!currentPlan.active) {
+        throw new AppError('Seu plano com esta empresa não esta ativo.');
+      }
 
-    if (enterprise?.owner_id === user_id) {
-      const ownerAppointment = await this.appointmentsRepository.create({
-        service_id,
-        user_id,
-        date: formattedServiceDate,
-        enterprise_id,
-      });
+      const planAppointmentsCapacity = await this.plansRepository.findById(
+        currentPlan.plan_id,
+      );
+      const allUsersAppointmentsFromThisEnterprise = await this.appointmentsRepository.searchAllAppointmentsFromUserBetweenDate(
+        {
+          createAt: currentPlan.created_at,
+          expirationAt: currentPlan.expiration_at,
+          user_id,
+          enterprise_id: service.enterprise_id,
+        },
+      );
 
-      return ownerAppointment;
+      if (
+        Number(allUsersAppointmentsFromThisEnterprise.length) >=
+        Number(planAppointmentsCapacity?.schedule_limit)
+      ) {
+        throw new AppError(
+          `Você pode se agendar ${Number(
+            planAppointmentsCapacity?.schedule_limit,
+          )} vezes com o seu plano atual, mas já agendou ${Number(
+            allUsersAppointmentsFromThisEnterprise.length,
+          )} vezes`,
+        );
+      }
     }
 
     const isUserInThisServiceAppointment = await this.appointmentsRepository.findByServiceAndUserId(
@@ -178,31 +205,6 @@ class CreateAppointmentService {
 
     if (Number(usersInService) >= Number(service.capacity)) {
       throw new AppError('Este horário esta cheio.');
-    }
-
-    const planAppointmentsCapacity = await this.plansRepository.findById(
-      currentPlan.plan_id,
-    );
-    const allUsersAppointmentsFromThisEnterprise = await this.appointmentsRepository.searchAllAppointmentsFromUserBetweenDate(
-      {
-        createAt: currentPlan.created_at,
-        expirationAt: currentPlan.expiration_at,
-        user_id,
-        enterprise_id: service.enterprise_id,
-      },
-    );
-
-    if (
-      Number(allUsersAppointmentsFromThisEnterprise.length) >=
-      Number(planAppointmentsCapacity?.schedule_limit)
-    ) {
-      throw new AppError(
-        `Você pode se agendar ${Number(
-          planAppointmentsCapacity?.schedule_limit,
-        )} vezes com o seu plano atual, mas já agendou ${Number(
-          allUsersAppointmentsFromThisEnterprise.length,
-        )} vezes`,
-      );
     }
 
     // const appointmentDate = startOfHour(date);

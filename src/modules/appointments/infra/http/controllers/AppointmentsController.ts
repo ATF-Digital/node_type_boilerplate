@@ -4,6 +4,7 @@ import ListUserAppointmentsService from '@modules/appointments/services/ListUser
 
 import { container } from 'tsyringe';
 import CreateAppointmentService from '@modules/appointments/services/CreateAppointmentService';
+import DeleteAppointmentService from '@modules/appointments/services/DeleteAppointmentService';
 import { classToClass } from 'class-transformer';
 
 export default class AppointmentsController {
@@ -17,6 +18,22 @@ export default class AppointmentsController {
     const userAppointments = await listUserAppointmentsService.execute(user_id);
 
     return response.json(classToClass(userAppointments));
+  }
+
+  public async remove(request: Request, response: Response): Promise<Response> {
+    const user_id = request.user.id;
+    const { appointment_id } = request.params;
+
+    const listUserAppointmentsService = container.resolve(
+      DeleteAppointmentService,
+    );
+
+    await listUserAppointmentsService.execute({
+      user_id,
+      appointment_id,
+    });
+
+    return response.status(201).json();
   }
 
   public async create(request: Request, response: Response): Promise<Response> {

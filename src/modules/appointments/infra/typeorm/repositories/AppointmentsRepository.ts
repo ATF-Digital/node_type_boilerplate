@@ -31,6 +31,18 @@ class AppointmentsRepository implements IAppointmentsRepository {
     return findAppointment;
   }
 
+  public async findById(id: string): Promise<Appointment | undefined> {
+    const findAppointment = await this.ormRepository.findOne({
+      where: { id },
+    });
+
+    return findAppointment;
+  }
+
+  public async remove(data: ICreateAppointmentDTO): Promise<Appointment> {
+    await this.ormRepository.remove(data);
+  }
+
   public async findAllInMonthFromProvider({
     provider_id,
     month,

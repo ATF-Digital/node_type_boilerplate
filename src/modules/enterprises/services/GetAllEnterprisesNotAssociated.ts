@@ -14,7 +14,9 @@ class GetMyEnterprise {
   ) {}
 
   public async execute({ user_id }: IRequest): Promise<Enterprises[]> {
-    const enterprises = await this.enterprisesRepository.findAll(user_id);
+    const enterprises = await this.enterprisesRepository.findAllNotAssociated(
+      user_id,
+    );
 
     return enterprises;
   }

@@ -45,6 +45,10 @@ enterprisesRouter.get(
 enterprisesRouter.get('/mine', enterprisesController.mine);
 
 enterprisesRouter.get('/all', enterprisesController.all);
+enterprisesRouter.get(
+  '/all-unregistered',
+  enterprisesController.allUnregistered,
+);
 
 enterprisesRouter.patch(
   '/logo',
