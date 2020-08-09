@@ -17,7 +17,7 @@ export default function ensureAuthenticated(
   const authHeader = request.headers.authorization;
 
   if (!authHeader) {
-    throw new AppError('JWT token is missing', 401);
+    throw new AppError('JWT token não encontrado', 401);
   }
 
   const token = authHeader.replace('Bearer ', '');
@@ -32,6 +32,6 @@ export default function ensureAuthenticated(
     };
     return next();
   } catch (err) {
-    throw new AppError('Invalid JWT Token', 401);
+    throw new AppError('Token expirou, refaça o login.', 401);
   }
 }

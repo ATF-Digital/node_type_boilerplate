@@ -4,23 +4,37 @@ import { celebrate, Segments, Joi } from 'celebrate';
 import ensureAuthenticated from '@modules/users/infra/http/middlewares/ensureAuthenticated';
 
 import AppointmentsController from '../controllers/AppointmentsController';
-import ProviderAppointmentsControllers from '../controllers/ProviderAppointmentsControllers';
 
 const appointmentsRouter = Router();
 const appointmentsController = new AppointmentsController();
-const providerAppointmentsControllers = new ProviderAppointmentsControllers();
+
 appointmentsRouter.use(ensureAuthenticated);
+
+appointmentsRouter.get('/me', appointmentsController.index);
+
+appointmentsRouter.delete(
+  '/:appointment_id',
+  celebrate({
+    [Segments.PARAMS]: {
+      appointment_id: Joi.string().uuid().required(),
+    },
+  }),
+  appointmentsController.remove,
+);
 
 appointmentsRouter.post(
   '/',
   celebrate({
     [Segments.BODY]: {
-      provider_id: Joi.string().uuid().required(),
-      date: Joi.date(),
+      service_id: Joi.string()
+        .uuid()
+        .required()
+        .label('Por favor, selecione um horário'),
+      enterprise_id: Joi.string().uuid().required(),
+      service_date: Joi.date().required(),
     },
   }),
   appointmentsController.create,
 );
-appointmentsRouter.get('/me', providerAppointmentsControllers.index);
 
 export default appointmentsRouter;

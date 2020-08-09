@@ -3,37 +3,75 @@ import multer from 'multer';
 import uploadConfig from '@config/upload';
 
 import { celebrate, Segments, Joi } from 'celebrate';
-import ensureAuthenticated from '../middlewares/ensureAuthenticated';
+import ensureAuthenticated from '@modules/users/infra/http/middlewares/ensureAuthenticated';
+
 import EnterprisesController from '../controllers/EnterprisesController';
-import EnterpriseAvatarController from '../controllers/EnterpriseAvatarController';
+import EnterpriseLogoController from '../controllers/EnterpriseLogoController';
 
 const enterprisesRouter = Router();
 const upload = multer(uploadConfig.multer);
 const enterprisesController = new EnterprisesController();
-const enterpriseAvatarController = new EnterpriseAvatarController();
+const enterpriseLogoController = new EnterpriseLogoController();
+
+enterprisesRouter.use(ensureAuthenticated);
+
 enterprisesRouter.post(
   '/',
   celebrate({
     [Segments.BODY]: {
       name: Joi.string().required(),
       area: Joi.string().required(),
-      owner_id: Joi.string().uuid().required(),
       address: Joi.string().required(),
       open_hour: Joi.string().required(),
       close_hour: Joi.string().required(),
       primary_color: Joi.string().required(),
       secondary_color: Joi.string().required(),
-      private: Joi.boolean().required(),
+      isPrivate: Joi.number(),
     },
   }),
   enterprisesController.create,
+);
+
+enterprisesRouter.put(
+  '/',
+  celebrate({
+    [Segments.BODY]: {
+      name: Joi.string().required(),
+      area: Joi.string().required(),
+      address: Joi.string().required(),
+      open_hour: Joi.string().required(),
+      close_hour: Joi.string().required(),
+      primary_color: Joi.string().required(),
+      secondary_color: Joi.string().required(),
+      isPrivate: Joi.number(),
+    },
+  }),
+  enterprisesController.update,
+);
+
+enterprisesRouter.get(
+  '/:name/search',
+  celebrate({
+    [Segments.PARAMS]: {
+      name: Joi.string().required(),
+    },
+  }),
+  enterprisesController.show,
+);
+
+enterprisesRouter.get('/mine', enterprisesController.mine);
+
+enterprisesRouter.get('/all', enterprisesController.all);
+enterprisesRouter.get(
+  '/all-unregistered',
+  enterprisesController.allUnregistered,
 );
 
 enterprisesRouter.patch(
   '/logo',
   ensureAuthenticated,
   upload.single('logo'),
-  enterpriseAvatarController.update,
+  enterpriseLogoController.update,
 );
 
 export default enterprisesRouter;

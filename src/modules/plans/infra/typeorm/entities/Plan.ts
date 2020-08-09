@@ -1,43 +1,51 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
+  Entity,
+  Index,
   JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
-import Enterprise from '@modules/enterprises/infra/typeorm/entities/Enterprise';
+import Enterprises from '@modules/enterprises/infra/typeorm/entities/Enterprises';
+import UserPlans from '@modules/plans/infra/typeorm/entities/PlansUsers';
 
-@Entity('plans')
-class Plan {
+@Index('plans_enterprises_enterprise_id_fk', ['enterprise_id'], {})
+@Entity('plans', { schema: 'nahora' })
+export default class Plans {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('varchar', { name: 'name', length: 255 })
   name: string;
 
-  @Column()
+  @Column('varchar', { name: 'enterprise_id', length: 255 })
   enterprise_id: string;
 
-  @ManyToOne(() => Enterprise)
-  @JoinColumn({ name: 'enterprise_id' })
-  enterprise: Enterprise;
+  @Column('decimal', { name: 'price', precision: 10, scale: 2 })
+  price: string;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2 })
-  price: number;
-
-  @Column('integer')
+  @Column('int', { name: 'schedule_limit', unsigned: true })
   schedule_limit: number;
 
-  @Column('timestamp with time zone')
-  expiration_date: Date;
+  @Column('int', { name: 'days_to_expire', unsigned: true })
+  days_to_expire: number;
 
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-}
 
-export default Plan;
+  @ManyToOne(() => Enterprises, enterprises => enterprises.plans, {
+    onDelete: 'RESTRICT',
+    onUpdate: 'RESTRICT',
+  })
+  @JoinColumn([{ name: 'enterprise_id', referencedColumnName: 'id' }])
+  enterprise: Enterprises;
+
+  @OneToMany(() => UserPlans, userPlans => userPlans.plan)
+  userPlans: UserPlans[];
+}

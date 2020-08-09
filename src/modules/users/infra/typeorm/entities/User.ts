@@ -1,35 +1,41 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
+  OneToMany,
+  Index,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
 } from 'typeorm';
 import uploadConfig from '@config/upload';
-import EnterprisesUsers from '@modules/enterprises/infra/typeorm/entities/EnterprisesUsers';
 import { Exclude, Expose } from 'class-transformer';
-import Plan from '@modules/plans/infra/typeorm/entities/Plan';
+import UserPlans from '@modules/plans/infra/typeorm/entities/PlansUsers';
+import Usertoken from '@modules/users/infra/typeorm/entities/UserToken';
+import UsersEnterprises from '@modules/enterprises/infra/typeorm/entities/EnterprisesUsers';
+import Enterprises from '@modules/enterprises/infra/typeorm/entities/Enterprises';
+import Appointments from '@modules/appointments/infra/typeorm/entities/Appointment';
 
-@Entity('users')
-class User {
+@Index('email', ['email'], { unique: true })
+@Entity('users', { schema: 'nahora' })
+export default class Users {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('varchar', { name: 'name', length: 255 })
   name: string;
 
-  @Column()
+  @Column('varchar', { name: 'email', unique: true, length: 255 })
   email: string;
 
-  @Column()
+  @Column('varchar', { name: 'password', length: 255 })
   @Exclude()
   password: string;
 
-  @Column()
-  avatar: string;
+  @Column('varchar', { name: 'avatar', nullable: true, length: 255 })
+  avatar: string | null;
+
+  @Column('varchar', { name: 'celphone', nullable: true, length: 255 })
+  celphone: string | null;
 
   @CreateDateColumn()
   created_at: Date;
@@ -37,15 +43,27 @@ class User {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @OneToMany(() => Appointments, appointments => appointments.user)
+  appointments: Appointments[];
+
+  @OneToMany(() => Enterprises, enterprises => enterprises.owner)
+  enterprises: Enterprises[];
+
   @OneToMany(
-    () => EnterprisesUsers,
-    enterprisesUsers => enterprisesUsers.user,
-    {
-      cascade: ['insert'],
-      eager: true,
-    },
+    () => UsersEnterprises,
+    usersEnterprises => usersEnterprises.user,
+    // {
+    //   cascade: true,
+    //   eager: true,
+    // },
   )
-  enterprises_users: EnterprisesUsers[];
+  usersEnterprises: UsersEnterprises[];
+
+  @OneToMany(() => Usertoken, usertoken => usertoken.user)
+  usertokens: Usertoken[];
+
+  @OneToMany(() => UserPlans, userPlans => userPlans.user)
+  userPlans: UserPlans[];
 
   @Expose({ name: 'avatar_url' })
   getAvatarUrl(): string | null {
@@ -62,5 +80,3 @@ class User {
     }
   }
 }
-
-export default User;
