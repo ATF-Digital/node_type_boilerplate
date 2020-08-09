@@ -22,10 +22,10 @@ planRouter.post(
   '/',
   celebrate({
     [Segments.BODY]: {
-      name: Joi.string().required(),
-      price: Joi.number().required(),
-      schedule_limit: Joi.number().required(),
-      days_to_expire: Joi.number().required(),
+      name: Joi.string().required().label('nome do plano'),
+      price: Joi.number().required().label('preço'),
+      schedule_limit: Joi.number().required().label('limite de agendamentos'),
+      days_to_expire: Joi.number().required().label('dias para expirar'),
     },
   }),
   plansController.create,

@@ -26,10 +26,27 @@ enterprisesRouter.post(
       close_hour: Joi.string().required(),
       primary_color: Joi.string().required(),
       secondary_color: Joi.string().required(),
-      isPrivate: Joi.boolean(),
+      isPrivate: Joi.number(),
     },
   }),
   enterprisesController.create,
+);
+
+enterprisesRouter.put(
+  '/',
+  celebrate({
+    [Segments.BODY]: {
+      name: Joi.string().required(),
+      area: Joi.string().required(),
+      address: Joi.string().required(),
+      open_hour: Joi.string().required(),
+      close_hour: Joi.string().required(),
+      primary_color: Joi.string().required(),
+      secondary_color: Joi.string().required(),
+      isPrivate: Joi.number(),
+    },
+  }),
+  enterprisesController.update,
 );
 
 enterprisesRouter.get(

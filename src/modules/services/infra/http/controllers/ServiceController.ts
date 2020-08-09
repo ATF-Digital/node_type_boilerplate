@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 
 import CreateServicesService from '@modules/services/services/CreateServicesService';
 import SearchServiceService from '@modules/services/services/SearchServiceService';
+import DeleteServiceService from '@modules/services/services/DeleteServiceService';
 
 import { container } from 'tsyringe';
 import { classToClass } from 'class-transformer';
@@ -26,6 +27,20 @@ export default class ServiceController {
       year,
       month,
       day,
+    });
+
+    return response.json(classToClass(serviceCategory));
+  }
+
+  public async delete(request: Request, response: Response): Promise<Response> {
+    const { service_id } = request.params;
+    const user_id = request.user.id;
+
+    const searchServiceService = container.resolve(DeleteServiceService);
+
+    const serviceCategory = await searchServiceService.execute({
+      service_id,
+      user_id,
     });
 
     return response.json(classToClass(serviceCategory));

@@ -19,9 +19,18 @@ class ServiceRepository implements IServiceRepository {
   }
 
   public async findById(id: string): Promise<Service | undefined> {
-    const enterprise = await this.ormRepository.findOne({ where: { id } });
+    const enterprise = await this.ormRepository.findOne({
+      relations: ['enterprise'],
+      where: { id },
+    });
 
     return enterprise;
+  }
+
+  public async delete(service: Service): Promise<Service | undefined> {
+    const serviceDeleted = await this.ormRepository.remove(service);
+
+    return serviceDeleted;
   }
 
   public async findByDayWeekAndEnterpriseId(

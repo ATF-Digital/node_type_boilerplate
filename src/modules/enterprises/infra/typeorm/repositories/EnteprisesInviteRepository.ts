@@ -39,6 +39,18 @@ class EnterprisesUsersRepository implements IEnterprisesUsersRepository {
     return enterprise;
   }
 
+  public async findByUserIdAndEnterpriseIdAccepted({
+    enterprise_id,
+    user_id,
+  }: ICreateEnterpriseInviteDTO): Promise<EnterprisesUsers | undefined> {
+    const enterprise = await this.ormRepository.findOne({
+      relations: ['enterprise', 'user'],
+      where: { enterprise_id, user_id, accepted: 1 },
+    });
+
+    return enterprise;
+  }
+
   public async findByUserId(
     user_id: string,
   ): Promise<EnterprisesUsers | undefined> {
@@ -50,10 +62,40 @@ class EnterprisesUsersRepository implements IEnterprisesUsersRepository {
     return enterprise;
   }
 
+  public async deleteInvite(
+    invite: EnterprisesUsers,
+  ): Promise<EnterprisesUsers | undefined> {
+    const invitation = this.ormRepository.remove(invite);
+
+    return invitation;
+  }
+
   public async findAllByUserId(user_id: string): Promise<EnterprisesUsers[]> {
     const enterprise = await this.ormRepository.find({
       relations: ['enterprise', 'user'],
       where: { user_id },
+    });
+
+    return enterprise;
+  }
+
+  public async searchAllEnterpriseInvites(
+    enterprise_id: string,
+  ): Promise<EnterprisesUsers[]> {
+    const enterprise = await this.ormRepository.find({
+      relations: ['user'],
+      where: { enterprise_id, accepted: 0 },
+    });
+
+    return enterprise;
+  }
+
+  public async searchAllEnterpriseInvitesAccepted(
+    enterprise_id: string,
+  ): Promise<EnterprisesUsers[]> {
+    const enterprise = await this.ormRepository.find({
+      relations: ['user'],
+      where: { enterprise_id, accepted: 1 },
     });
 
     return enterprise;

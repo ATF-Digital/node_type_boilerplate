@@ -18,7 +18,7 @@ interface IRequestInvite {
 }
 
 @injectable()
-class CreateEnterpriseService {
+class GetAllEnterpriseService {
   constructor(
     @inject('EnterprisesUsersRepository')
     private enterprisesUsersRepository: IEnterprisesUsersRepository,
@@ -111,6 +111,53 @@ class CreateEnterpriseService {
     return invites;
   }
 
+  public async searchAllEnterpriseInvites(
+    user_id: string,
+  ): Promise<EnterprisesUsers[]> {
+    const enterprise = await this.enterprisesRepository.findByOwnerId(user_id);
+
+    if (!enterprise) {
+      throw new AppError('Você não é dono de nenhuma empresa');
+    }
+
+    const invites = await this.enterprisesUsersRepository.searchAllEnterpriseInvites(
+      enterprise?.id,
+    );
+
+    return invites;
+  }
+
+  public async searchAllAcceptedEnterpriseInvites(
+    user_id: string,
+  ): Promise<EnterprisesUsers[]> {
+    const enterprise = await this.enterprisesRepository.findByOwnerId(user_id);
+
+    if (!enterprise) {
+      throw new AppError('Você não é dono de nenhuma empresa');
+    }
+
+    const invites = await this.enterprisesUsersRepository.searchAllEnterpriseInvitesAccepted(
+      enterprise?.id,
+    );
+
+    const finalInvites: EnterprisesUsers[] = [];
+
+    const newInvites = invites.map(async invite => {
+      const activePlan = await this.plansUserRepository.findByActive(
+        invite.user_id,
+        invite.enterprise_id,
+      );
+      if (activePlan) {
+        return finalInvites.push({ ...invite, currentPlan: activePlan });
+      }
+      return finalInvites.push({ ...invite, currentPlan: null });
+    });
+
+    await Promise.all(newInvites);
+
+    return finalInvites;
+  }
+
   public async searchAllUserAcceptedInvites(
     user_id: string,
   ): Promise<EnterprisesUsers[]> {
@@ -127,18 +174,10 @@ class CreateEnterpriseService {
   }: IRequestInvite): Promise<EnterprisesUsers> {
     const invite = await this.enterprisesUsersRepository.findById(invite_id);
 
-    const inviteEnterpriseUser = await this.enterprisesUsersRepository.findByUserIdAndEnterpriseIdAccepted(
-      { enterprise_id: invite?.enterprise_id, user_id: invite?.user_id },
-    );
-
     if (!invite) {
       throw new AppError(
         'Não existe nenhum convite deste usuário com esta empresa.',
       );
-    }
-
-    if (inviteEnterpriseUser) {
-      throw new AppError('Esta empresa já aceitou este usuário.');
     }
 
     const enterprise = await this.enterprisesRepository.findById(
@@ -152,31 +191,6 @@ class CreateEnterpriseService {
     invite.accepted = 1;
 
     this.enterprisesUsersRepository.save(invite);
-
-    return invite;
-  }
-
-  public async remove({
-    invite_id,
-    user_id,
-  }: IRequestInvite): Promise<EnterprisesUsers> {
-    const invite = await this.enterprisesUsersRepository.findById(invite_id);
-
-    if (!invite) {
-      throw new AppError(
-        'Não existe nenhum convite deste usuário com esta empresa.',
-      );
-    }
-
-    const enterprise = await this.enterprisesRepository.findById(
-      invite.enterprise_id,
-    );
-
-    if (user_id !== enterprise?.owner_id) {
-      throw new AppError('Apenas o dono da empresa pode deletar convites.');
-    }
-
-    this.enterprisesUsersRepository.deleteInvite(invite);
 
     return invite;
   }
@@ -232,4 +246,4 @@ class CreateEnterpriseService {
   }
 }
 
-export default CreateEnterpriseService;
+export default GetAllEnterpriseService;

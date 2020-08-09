@@ -34,6 +34,9 @@ export default class Users {
   @Column('varchar', { name: 'avatar', nullable: true, length: 255 })
   avatar: string | null;
 
+  @Column('varchar', { name: 'celphone', nullable: true, length: 255 })
+  celphone: string | null;
+
   @CreateDateColumn()
   created_at: Date;
 

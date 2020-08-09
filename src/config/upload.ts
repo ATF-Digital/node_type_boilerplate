@@ -43,7 +43,7 @@ export default {
   config: {
     disk: {},
     aws: {
-      bucket: 'app-newgobarber',
+      bucket: 'app-nahora',
     },
   },
 } as IUploadConfig;

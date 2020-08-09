@@ -11,6 +11,7 @@ interface ISearchData {
 export default interface IServiceRepository {
   create(data: IServiceDTO[]): Promise<Service[]>;
   findById(id: string): Promise<Service | undefined>;
+  delete(service: Service): Promise<Service | undefined>;
   findByDayWeekAndEnterpriseId(searchData: ISearchData): Promise<Service[]>;
   findByDayWeekAndEnterpriseIdAndNameAndCategory(
     searchData: ISearchData,

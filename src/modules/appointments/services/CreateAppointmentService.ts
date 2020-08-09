@@ -1,13 +1,8 @@
 import {
-  startOfHour,
   isBefore,
-  getHours,
-  format,
   getDate,
   getMonth,
   getYear,
-  getMinutes,
-  subHours,
   addHours,
   isAfter,
 } from 'date-fns';
@@ -108,6 +103,12 @@ class CreateAppointmentService {
       );
     }
 
+    if (isBefore(new Date(formattedServiceDate), new Date())) {
+      throw new AppError(
+        'Não é possível se agendar em uma data que já passou.',
+      );
+    }
+
     if (enterprise?.owner_id === user_id) {
       const ownerAppointment = await this.appointmentsRepository.create({
         service_id,
@@ -117,12 +118,6 @@ class CreateAppointmentService {
       });
 
       return ownerAppointment;
-    }
-
-    if (isBefore(new Date(formattedServiceDate), new Date())) {
-      throw new AppError(
-        'Não é possível se agendar em uma data que já passou.',
-      );
     }
 
     if (isBefore(formattedServiceDate, formattedDateWithSubHoursToSchedule)) {

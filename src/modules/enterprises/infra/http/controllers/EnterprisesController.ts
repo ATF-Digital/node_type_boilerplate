@@ -9,6 +9,7 @@ import { classToClass } from 'class-transformer';
 import GetMyEnterprise from '@modules/enterprises/services/GetMyEnterprise';
 import GetAllEnterprises from '@modules/enterprises/services/GetAllEnterprises';
 import GetAllEnterprisesNotAssociated from '@modules/enterprises/services/GetAllEnterprisesNotAssociated';
+import UpdateEnterpriseService from '@modules/enterprises/services/UpdateEnterpriseService';
 
 export default class EnterpriseController {
   public async show(request: Request, response: Response): Promise<Response> {
@@ -113,6 +114,36 @@ export default class EnterpriseController {
       owner_id,
     });
 
-    return response.json(enterprise);
+    return response.json(classToClass(enterprise));
+  }
+
+  public async update(request: Request, response: Response): Promise<Response> {
+    const owner_id = request.user.id;
+    const {
+      name,
+      area,
+      address,
+      open_hour,
+      close_hour,
+      primary_color,
+      secondary_color,
+      isPrivate,
+    } = request.body;
+
+    const updateEnterprise = container.resolve(UpdateEnterpriseService);
+
+    const enterprise = await updateEnterprise.execute({
+      name,
+      area,
+      address,
+      open_hour,
+      close_hour,
+      primary_color,
+      secondary_color,
+      isPrivate,
+      owner_id,
+    });
+
+    return response.json(classToClass(enterprise));
   }
 }

@@ -19,6 +19,8 @@ servicesRouter.get(
   serviceController.index,
 );
 
+servicesRouter.delete('/:service_id', serviceController.delete);
+
 servicesRouter.post(
   '/',
   celebrate({

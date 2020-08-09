@@ -21,6 +21,7 @@ enterprisesInviteRouter.post(
   }),
   enterpriseInviteController.create,
 );
+
 enterprisesInviteRouter.get(
   '/user/:user_id/enterprise/:enterprise_id/search',
   celebrate({
@@ -31,15 +32,29 @@ enterprisesInviteRouter.get(
   }),
   enterpriseInviteController.index,
 );
+
 enterprisesInviteRouter.get('/', enterpriseInviteController.allInvites);
+
+enterprisesInviteRouter.get(
+  '/enterprise-invites',
+  enterpriseInviteController.allEnterpriseInvites,
+);
+
 enterprisesInviteRouter.get(
   '/accepted',
   enterpriseInviteController.allAcceptedInvites,
 );
+
+enterprisesInviteRouter.get(
+  '/enterprise/accepted',
+  enterpriseInviteController.allEnterpriseAcceptedInvites,
+);
+
 enterprisesInviteRouter.get(
   '/active-plan/:enterprise_id',
   enterpriseInviteController.show,
 );
+
 enterprisesInviteRouter.put(
   '/accept',
   celebrate({
@@ -48,6 +63,16 @@ enterprisesInviteRouter.put(
     },
   }),
   enterpriseInviteController.update,
+);
+
+enterprisesInviteRouter.delete(
+  '/:invite_id',
+  celebrate({
+    [Segments.PARAMS]: {
+      invite_id: Joi.string().uuid().required(),
+    },
+  }),
+  enterpriseInviteController.delete,
 );
 
 export default enterprisesInviteRouter;

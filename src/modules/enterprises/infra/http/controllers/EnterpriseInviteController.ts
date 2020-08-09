@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import CreateEnterpriseInviteService from '@modules/enterprises/services/CreateEnterpriseInviteService';
+import GetAllEnterpriseInviteService from '@modules/enterprises/services/GetAllEnterpriseInviteService';
 
 import { container } from 'tsyringe';
 import { classToClass, plainToClass } from 'class-transformer';
@@ -55,6 +56,23 @@ export default class EnterpriseInviteController {
     return response.json(classToClass(enterpriseInvite));
   }
 
+  public async allEnterpriseInvites(
+    request: Request,
+    response: Response,
+  ): Promise<Response> {
+    const user_id = request.user.id;
+
+    const getAllEnterpriseInvite = container.resolve(
+      GetAllEnterpriseInviteService,
+    );
+
+    const enterpriseInvite = await getAllEnterpriseInvite.searchAllEnterpriseInvites(
+      user_id,
+    );
+
+    return response.json(classToClass(enterpriseInvite));
+  }
+
   public async allAcceptedInvites(
     request: Request,
     response: Response,
@@ -72,6 +90,23 @@ export default class EnterpriseInviteController {
     return response.json(classToClass(enterpriseInvite));
   }
 
+  public async allEnterpriseAcceptedInvites(
+    request: Request,
+    response: Response,
+  ): Promise<Response> {
+    const user_id = request.user.id;
+
+    const createEnterpriseInvite = container.resolve(
+      GetAllEnterpriseInviteService,
+    );
+
+    const enterpriseInvite = await createEnterpriseInvite.searchAllAcceptedEnterpriseInvites(
+      user_id,
+    );
+
+    return response.json(classToClass(enterpriseInvite));
+  }
+
   public async update(request: Request, response: Response): Promise<Response> {
     const { invite_id } = request.body;
     const user_id = request.user.id;
@@ -81,6 +116,22 @@ export default class EnterpriseInviteController {
     );
 
     const enterpriseInvite = await createEnterpriseInvite.accept({
+      invite_id,
+      user_id,
+    });
+
+    return response.json(enterpriseInvite);
+  }
+
+  public async delete(request: Request, response: Response): Promise<Response> {
+    const { invite_id } = request.params;
+    const user_id = request.user.id;
+
+    const createEnterpriseInvite = container.resolve(
+      CreateEnterpriseInviteService,
+    );
+
+    const enterpriseInvite = await createEnterpriseInvite.remove({
       invite_id,
       user_id,
     });

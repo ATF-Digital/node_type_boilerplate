@@ -12,6 +12,7 @@ import IHashProvider from '../providers/HashProvider/models/IHashProvider';
 interface IRequest {
   user_id: string;
   name: string;
+  celphone: string;
   email: string;
   old_password?: string;
   password?: string;
@@ -31,23 +32,25 @@ class UpdateProfileService {
     user_id,
     name,
     email,
+    celphone,
     password,
     old_password,
   }: IRequest): Promise<User> {
     const user = await this.usersRepository.findById(user_id);
 
     if (!user) {
-      throw new AppError('Uset not found.');
+      throw new AppError('Usuário não encontrado.');
     }
 
     const userWithUpdatedEmail = await this.usersRepository.findByEmail(email);
 
     if (userWithUpdatedEmail && userWithUpdatedEmail.id !== user_id) {
-      throw new AppError('Email already in use.');
+      throw new AppError('Email já está sendo usado.');
     }
 
     user.name = name;
     user.email = email;
+    user.celphone = celphone;
 
     if (password && !old_password) {
       throw new AppError(
