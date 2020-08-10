@@ -12,7 +12,7 @@ interface IRequest {
   close_hour: string;
   primary_color: string;
   secondary_color: string;
-  isPrivate: boolean;
+  isPrivate: number;
   owner_id: string;
 }
 

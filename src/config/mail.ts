@@ -14,8 +14,8 @@ export default {
 
   defaults: {
     from: {
-      email: 'augustotf93@gmail.com',
-      name: 'Augusto do GoBarber',
+      email: 'contato@nahora.app.br',
+      name: 'Augusto do NaHora',
     },
   },
 } as IMailConfig;
