@@ -7,5 +7,5 @@ export default interface ICreateEnterpriseDTO {
   close_hour: string;
   primary_color: string;
   secondary_color: string;
-  isPrivate: boolean;
+  isPrivate: number;
 }
